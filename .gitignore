@@ -1,2 +1,6 @@
 /connections.txt
 /.env
+/out
+/index.html
+/sqlc.yaml
+/req.http
