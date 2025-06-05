@@ -32,6 +32,7 @@ func (cfg *apiConfig) handlerCreateUser(writer http.ResponseWriter, req *http.Re
 		CreatedAt time.Time `json:"created_at"`
 		UpdatedAt time.Time `json:"updated_at"`
 		Email     string    `json:"email"`
+		IsChirpyRed bool	`json:"is_chirpy_red"`
 	}
 
 	hashedPassword, err := auth.HashPassword(params.Password)
@@ -66,6 +67,7 @@ func (cfg *apiConfig) handlerCreateUser(writer http.ResponseWriter, req *http.Re
 		CreatedAt:		databseUser.CreatedAt,
 		UpdatedAt:		databseUser.UpdatedAt,
 		Email:			databseUser.Email,
+		IsChirpyRed:	databseUser.IsChirpyRed,
 	}
 
 	data, err := json.Marshal(user)

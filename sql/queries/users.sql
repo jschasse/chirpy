@@ -20,3 +20,8 @@ WHERE email = $2;
 SELECT *
 FROM users
 WHERE email = $1;
+
+-- name: UpgradeUserRed :exec
+UPDATE users
+SET is_chirpy_red = true
+WHERE id = $1;

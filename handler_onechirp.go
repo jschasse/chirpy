@@ -30,7 +30,7 @@ func (cfg *apiConfig) handlerOneChirp(writer http.ResponseWriter, req *http.Requ
 	chirpdata, err := cfg.dbQueries.GetOneChirp(req.Context(), chirpID)
 	if err != nil {
 		log.Printf("Error getting chirp: %s", err)
-		writer.WriteHeader(500)
+		writer.WriteHeader(404)
 		return
 	}
 

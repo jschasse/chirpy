@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -17,7 +19,7 @@ VALUES (
     NOW(),
     $1
 )
-RETURNING id, created_at, updated_at, email, hashed_password
+RETURNING id, created_at, updated_at, email, hashed_password, is_chirpy_red
 `
 
 func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
@@ -29,6 +31,7 @@ func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -43,7 +46,7 @@ func (q *Queries) DeleteUsers(ctx context.Context) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, created_at, updated_at, email, hashed_password
+SELECT id, created_at, updated_at, email, hashed_password, is_chirpy_red
 FROM users
 WHERE email = $1
 `
@@ -57,6 +60,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -74,5 +78,16 @@ type InsertPasswordParams struct {
 
 func (q *Queries) InsertPassword(ctx context.Context, arg InsertPasswordParams) error {
 	_, err := q.db.ExecContext(ctx, insertPassword, arg.HashedPassword, arg.Email)
+	return err
+}
+
+const upgradeUserRed = `-- name: UpgradeUserRed :exec
+UPDATE users
+SET is_chirpy_red = true
+WHERE id = $1
+`
+
+func (q *Queries) UpgradeUserRed(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, upgradeUserRed, id)
 	return err
 }

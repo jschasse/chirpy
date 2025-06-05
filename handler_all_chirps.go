@@ -6,6 +6,8 @@ import(
 	"log"
 	"github.com/google/uuid"
 	"time"
+	"github.com/jschasse/chirpy/internal/database"
+	"sort"
 )
 
 func (cfg *apiConfig) handlerAllChirps(writer http.ResponseWriter, req *http.Request) {
@@ -17,12 +19,34 @@ func (cfg *apiConfig) handlerAllChirps(writer http.ResponseWriter, req *http.Req
 		UserID    uuid.UUID `json:"user_id"`
 	}
 
-	resChirps, err := cfg.dbQueries.GetChirps(req.Context())
-	if err != nil {
-		log.Printf("Error getting chirps: %s", err)
-		writer.WriteHeader(500)
-		return
-	}
+    authorIDStr := req.URL.Query().Get("author_id")
+	sortStr := req.URL.Query().Get("sort")
+    
+	var resChirps []database.Chirp
+	var err error
+
+    if authorIDStr != "" {
+        authorID, err := uuid.Parse(authorIDStr)
+        if err != nil {
+            log.Printf("Invalid author_id format: %s", err)
+            writer.WriteHeader(400)
+            return
+        }
+        
+        resChirps, err = cfg.dbQueries.GetChirpsByUserID(req.Context(), authorID)
+        if err != nil {
+            log.Printf("Error getting chirps by user ID: %s", err)
+            writer.WriteHeader(500)
+            return
+        }
+    } else {
+        resChirps, err = cfg.dbQueries.GetChirps(req.Context())
+        if err != nil {
+            log.Printf("Error getting chirps: %s", err)
+            writer.WriteHeader(500)
+            return
+        }
+    }
 
 	chirps := []chirp{}
 
@@ -36,6 +60,10 @@ func (cfg *apiConfig) handlerAllChirps(writer http.ResponseWriter, req *http.Req
 		}
 
 		chirps = append(chirps, tmp)
+	}
+
+	if sortStr == "desc" {
+		sort.Slice(chirps, func(i, j int) bool { return chirps[i].CreatedAt.After(chirps[j].CreatedAt) })
 	}
 
 	data, err := json.Marshal(chirps)

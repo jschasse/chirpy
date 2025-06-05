@@ -72,6 +72,7 @@ func (cfg *apiConfig) handlerLogin(writer http.ResponseWriter, req *http.Request
 		Email     	 string    `json:"email"`
 		Token	  	 string	   `json:"token"`
 		RefreshToken string    `json:"refresh_token"`
+		IsChirpyRed  bool	   `json:"is_chirpy_red"`
 	}
 
 	resUser := User{
@@ -81,6 +82,7 @@ func (cfg *apiConfig) handlerLogin(writer http.ResponseWriter, req *http.Request
 		Email:			user.Email,
 		Token:			token,
 		RefreshToken:	r_token,
+		IsChirpyRed:	user.IsChirpyRed,
 	}
 
 	data, err := json.Marshal(resUser)
